@@ -1,19 +1,10 @@
-import axios from "axios";
 import { router } from "expo-router";
 import React, { useState } from "react";
-import {
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { api } from "../services/api";
 
 export default function Home() {
-  const [role, setRole] = useState<"student" | "faculty" | "admin">(
-    "student"
-  );
-
+  const [role, setRole] = useState<"student" | "faculty" | "admin"> ("student");
   const [userId, setUserId] = useState("");
   const [password, setPassword] = useState("");
 
@@ -23,36 +14,35 @@ export default function Home() {
 
       switch (role) {
         case "student":
-          requestBody = {
-            scholarNumber: userId,
-            password,
-          };
+          requestBody = {scholarNumber: userId, password};
           break;
 
         case "faculty":
-          requestBody = {
-            employeeNumber: userId,
-            password,
-          };
+          requestBody = { employeeNumber: userId, password};
           break;
 
         case "admin":
-          requestBody = {
-            adminNumber: userId,
-            password,
-          };
+          requestBody = {adminNumber: userId, password};
           break;
       }
 
       console.log("Request Body:", requestBody);
 
-      const response = await axios.post(
-        `http://localhost:3000/auth/login/${role}`,
-        requestBody,
-        {
-          withCredentials: true,
-        }
-      );
+
+      // ####### WILL BE REMOVED LATER, THIS IS JUST FOR TESTING PURPOSES #######
+
+      // const response = await axios.post(
+      //   `http://localhost:3000/auth/login/${role}`,
+      //   requestBody,
+      //   {
+      //     withCredentials: true,
+      //   }
+      // );
+
+      // ####### WILL BE REMOVED LATER, THIS IS JUST FOR TESTING PURPOSES #######
+
+
+      const response = await api.post(`/auth/login/${role}`,requestBody);
 
       console.log(response.data);
 

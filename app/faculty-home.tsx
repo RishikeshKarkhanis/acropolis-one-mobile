@@ -2,6 +2,8 @@ import axios from "axios";
 import * as Location from "expo-location";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View, } from "react-native";
+import { api } from "../services/api";
+import { FacultySubjectMapping } from "../types/FacultySubjectMapping";
 
 export default function FacultyDashboard() {
   const [name, setName] = useState("");
@@ -9,7 +11,7 @@ export default function FacultyDashboard() {
 
   const [showAssignedSubjects, setShowAssignedSubjects] = useState(false);
 
-  const [subjects, setSubjects] = useState<any[]>([]);
+  const [subjects, setSubjects] = useState<FacultySubjectMapping[]>([]);
   const [subjectsLoading, setSubjectsLoading] = useState(false);
 
   const [showTakeAttendance, setShowTakeAttendance] = useState(false);
@@ -27,6 +29,16 @@ export default function FacultyDashboard() {
     };
     fetchFaculty();
   }, []);
+
+  const fetchSubjects = async () => {
+    try {
+      setSubjectsLoading(true);
+      const response = await api.get("/faculty/assigned-subjects");
+      setSubjects(response.data.subjects);
+    }
+    catch (error: any) { console.log(error.response?.data || error.message); }
+    finally { setSubjectsLoading(false); }
+  };
 
   const fetchAssignedSubjects = async () => {
     try {
@@ -54,7 +66,7 @@ export default function FacultyDashboard() {
     finally { setSubjectsLoading(false); }
   };
 
-  const startLecture = async (subject: any) => {
+  const startLecture = async (subject: FacultySubjectMapping) => {
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
 
@@ -63,7 +75,7 @@ export default function FacultyDashboard() {
         return;
       }
 
-      const location = await Location.getCurrentPositionAsync({accuracy: Location.Accuracy.High,});
+      const location = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High, });
 
       const latitude = location.coords.latitude;
       const longitude = location.coords.longitude;
@@ -149,7 +161,7 @@ export default function FacultyDashboard() {
             {subjectsLoading ? (
               <ActivityIndicator size="large" />
             ) : (
-              subjects.map((subject) => (
+              subjects.map((subject: FacultySubjectMapping) => (
                 <View
                   key={subject.mappingId}
                   style={styles.subjectCard}
@@ -196,7 +208,7 @@ export default function FacultyDashboard() {
             {subjectsLoading ? (
               <ActivityIndicator size="large" />
             ) : (
-              subjects.map((subject) => (
+              subjects.map((subject: FacultySubjectMapping) => (
                 <TouchableOpacity
                   key={subject.mappingId}
                   style={styles.subjectCard}

@@ -1,28 +1,25 @@
-import axios from "axios";
 import * as Location from "expo-location";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View, } from "react-native";
 import { api } from "../services/api";
+import { Faculty } from "../types/Faculty";
 import { FacultySubjectMapping } from "../types/FacultySubjectMapping";
 
+type ScreenMode = | "menu" | "subjects" | "attendance";
+
 export default function FacultyDashboard() {
-  const [name, setName] = useState("");
+  const [faculty, setFaculty] = useState<Faculty | null>(null);
   const [loading, setLoading] = useState(true);
-
-  const [showAssignedSubjects, setShowAssignedSubjects] = useState(false);
-
+  const [mode, setMode] = useState<ScreenMode>("menu");
   const [subjects, setSubjects] = useState<FacultySubjectMapping[]>([]);
   const [subjectsLoading, setSubjectsLoading] = useState(false);
-
-  const [showTakeAttendance, setShowTakeAttendance] = useState(false);
-
   const [currentLectureId, setCurrentLectureId] = useState("");
 
   useEffect(() => {
     const fetchFaculty = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/faculty/me", { withCredentials: true, });
-        setName(response.data.faculty.name);
+        const response = await api.get("faculty/me");
+        setFaculty(response.data.faculty);
       }
       catch (error: any) { console.log(error.response?.data || error.message); }
       finally { setLoading(false); }
@@ -41,30 +38,16 @@ export default function FacultyDashboard() {
   };
 
   const fetchAssignedSubjects = async () => {
-    try {
-      setSubjectsLoading(true);
-      const response = await axios.get("http://localhost:3000/faculty/assigned-subjects", { withCredentials: true, });
-      console.log(response.data);
-      setSubjects(response.data.subjects);
-      setShowTakeAttendance(false);
-      setShowAssignedSubjects(true);
-    }
-    catch (error: any) { console.log(error.response?.data || error.message); }
-    finally { setSubjectsLoading(false); }
+    await fetchSubjects();
+    setMode("subjects");
   };
 
   const fetchSubjectsForAttendance = async () => {
-    try {
-      setSubjectsLoading(true);
-
-      const response = await axios.get("http://localhost:3000/faculty/assigned-subjects", { withCredentials: true, });
-      setSubjects(response.data.subjects);
-      setShowAssignedSubjects(false);
-      setShowTakeAttendance(true);
-    }
-    catch (error: any) { console.log(error.response?.data || error.message); }
-    finally { setSubjectsLoading(false); }
+    await fetchSubjects();
+    setMode("attendance");
   };
+
+
 
   const startLecture = async (subject: FacultySubjectMapping) => {
     try {
@@ -80,20 +63,22 @@ export default function FacultyDashboard() {
       const latitude = location.coords.latitude;
       const longitude = location.coords.longitude;
 
-      const response = await axios.post("http://localhost:3000/faculty/create-lecture-session", {
+      console.log({
+        subjectCode: subject.subjectCode,
+        subjectType: subject.subjectType,
+        semester: subject.semester,
+        section: subject.section,
+      });
+
+      const response = await api.post("/faculty/create-lecture-session", {
         subjectCode: subject.subjectCode,
         semester: subject.semester,
-        department: "AL",
+        department: faculty?.department,
         division: subject.section,
         lectureType: subject.subjectType,
         facultyLatitude: latitude,
         facultyLongitude: longitude
-      },
-
-        {
-          withCredentials: true,
-        }
-      );
+      });
 
       setCurrentLectureId(response.data.lectureSession.lectureId);
       alert(response.data.message);
@@ -103,13 +88,10 @@ export default function FacultyDashboard() {
 
   const endLecture = async () => {
     try {
-      const response = await axios.post("http://localhost:3000/faculty/end-lecture-session", {
-        lectureId: currentLectureId,
-      }, { withCredentials: true, });
-
+      const response = await api.post("faculty/end-lecture-session", { lectureId: currentLectureId });
       alert(response.data.message);
       setCurrentLectureId("");
-      setShowTakeAttendance(false);
+      setMode("menu");
     }
     catch (error: any) { alert(error.response?.data?.message || "Failed to end lecture"); }
   };
@@ -124,15 +106,14 @@ export default function FacultyDashboard() {
 
       <View style={styles.navbar}>
         <Text style={styles.welcomeText}>
-          Welcome, {name}
+          Welcome, {faculty?.name || "Faculty"}
         </Text>
       </View>
 
       {/* Content */}
 
       <View style={styles.menuContainer}>
-        {!showAssignedSubjects &&
-          !showTakeAttendance ? (
+        {mode === "menu" ? (
           <>
             <TouchableOpacity
               style={styles.menuItem}
@@ -152,7 +133,7 @@ export default function FacultyDashboard() {
               </Text>
             </TouchableOpacity>
           </>
-        ) : showAssignedSubjects ? (
+        ) : mode === "subjects" ? (
           <View>
             <Text style={styles.sectionTitle}>
               Assigned Subjects
@@ -191,7 +172,7 @@ export default function FacultyDashboard() {
             <TouchableOpacity
               style={styles.backButton}
               onPress={() =>
-                setShowAssignedSubjects(false)
+                setMode("menu")
               }
             >
               <Text style={styles.backButtonText}>
@@ -282,7 +263,7 @@ export default function FacultyDashboard() {
             <TouchableOpacity
               style={styles.backButton}
               onPress={() => {
-                setShowTakeAttendance(false);
+                setMode("menu");
                 setCurrentLectureId("");
               }}
             >

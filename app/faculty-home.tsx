@@ -1,6 +1,9 @@
 import * as Location from "expo-location";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View, } from "react-native";
+import LoadingScreen from "../components/LoadingScreen/LoadingScreen";
+import MenuItem from "../components/MenuItem/MenuItem";
+import Navbar from "../components/Navbar/Navbar";
 import { api } from "../services/api";
 import { Faculty } from "../types/Faculty";
 import { FacultySubjectMapping } from "../types/FacultySubjectMapping";
@@ -97,41 +100,21 @@ export default function FacultyDashboard() {
   };
 
   if (loading) {
-    return (<View style={styles.loader}><ActivityIndicator size="large" /></View>);
+    return <LoadingScreen />;
   }
 
   return (
     <View style={styles.container}>
-      {/* Navbar */}
 
-      <View style={styles.navbar}>
-        <Text style={styles.welcomeText}>
-          Welcome, {faculty?.name || "Faculty"}
-        </Text>
-      </View>
+      {/* Navbar */}
+      <Navbar faculty={faculty} />
 
       {/* Content */}
-
       <View style={styles.menuContainer}>
         {mode === "menu" ? (
           <>
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={fetchAssignedSubjects}
-            >
-              <Text style={styles.menuText}>
-                Assigned Subjects
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={fetchSubjectsForAttendance}
-            >
-              <Text style={styles.menuText}>
-                Take Attendance
-              </Text>
-            </TouchableOpacity>
+            <MenuItem title="Assigned Subjects" onPress={fetchAssignedSubjects} />
+            <MenuItem title="Take Attendance" onPress={fetchSubjectsForAttendance} />
           </>
         ) : mode === "subjects" ? (
           <View>

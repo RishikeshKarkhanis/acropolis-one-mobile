@@ -1,7 +1,8 @@
+import LoadingScreen from "@/components/LoadingScreen/LoadingScreen";
 import axios from "axios";
 import * as Location from "expo-location";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 export default function Dashboard() {
   const [name, setName] = useState("");
@@ -97,11 +98,7 @@ export default function Dashboard() {
   };
 
   if (loading) {
-    return (
-      <View style={styles.loader}>
-        <ActivityIndicator size="large" />
-      </View>
-    );
+    return <LoadingScreen />;
   }
 
   return (

@@ -1,5 +1,6 @@
 import LoadingScreen from "@/components/LoadingScreen/LoadingScreen";
 import axios from "axios";
+import { Stack } from "expo-router";
 import { useEffect, useState } from "react";
 import { Text, View } from "react-native";
 
@@ -35,13 +36,10 @@ export default function Dashboard() {
   }
 
   return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
+    <View style={{ flex: 1, justifyContent: "center", alignItems: "center",}}>
+
+      <Stack.Screen options={{ headerShown: false }}/>
+
       <Text
         style={{
           fontSize: 24,

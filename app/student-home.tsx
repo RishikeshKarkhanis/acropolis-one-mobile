@@ -1,6 +1,7 @@
 import LoadingScreen from "@/components/LoadingScreen/LoadingScreen";
 import axios from "axios";
 import * as Location from "expo-location";
+import { Stack } from "expo-router";
 import { useEffect, useState } from "react";
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 
@@ -103,6 +104,9 @@ export default function Dashboard() {
 
   return (
     <View style={styles.container}>
+
+      <Stack.Screen options={{ headerShown: false }}/>
+
       {/* Navbar */}
 
       <View style={styles.navbar}>

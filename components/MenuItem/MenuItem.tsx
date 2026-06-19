@@ -6,11 +6,12 @@ const styles = StyleSheet.create({
         padding: 18,
         borderRadius: 12,
         marginBottom: 12,
-
         shadowColor: "#000",
         shadowOpacity: 0.08,
         shadowRadius: 4,
         elevation: 2,
+        marginLeft:20,
+        marginRight:20,
     },
 
     menuText: {

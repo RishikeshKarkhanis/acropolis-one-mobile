@@ -1,4 +1,4 @@
-import { router } from "expo-router";
+import { router, Stack } from "expo-router";
 import React, { useState } from "react";
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { api } from "../services/api";
@@ -90,6 +90,7 @@ export default function Home() {
 
   return (
     <View style={styles.container}>
+      <Stack.Screen options={{ headerShown: false }}/>
       <Text style={styles.title}>Login</Text>
 
       {/* Role Selector */}

@@ -14,16 +14,27 @@ const styles = StyleSheet.create({
     },
 
     menuText: {
-        fontSize: 16,
-        fontWeight: "600",
-        color: "#0f172a",
+        fontSize: 18,
+        fontWeight: "bold",
+        color: "black",
+    },
+
+    subtitleText: {
+        fontSize: 14,
+        color: "#64748b",
+        marginTop: 4,
     }
 });
 
-export default function MenuItem(props: { title: string, onPress: () => void }) {
+export default function MenuItem(props: { title: string, textColor?: string, subtitle?: string[], onPress?: () => void }) {
     return (
         <TouchableOpacity style={styles.menuItem} onPress={props.onPress}>
-            <Text style={styles.menuText}>{props.title}</Text>
+            <Text style={[styles.menuText, { color: props.textColor }]}>{props.title}</Text>
+            {props.subtitle && props.subtitle.map((sub, index) => (
+                <Text style={styles.subtitleText} key={index}>
+                    {sub}
+                </Text>
+            ))}
         </TouchableOpacity>
     );
 }

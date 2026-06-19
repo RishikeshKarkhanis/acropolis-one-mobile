@@ -8,7 +8,7 @@ import { api } from "../services/api";
 import { Faculty } from "../types/Faculty";
 import { FacultySubjectMapping } from "../types/FacultySubjectMapping";
 
-type ScreenMode = | "menu" | "subjects" | "attendance";
+type ScreenMode = | "menu" | "subjects" | "attendance" | "logout";
 
 export default function FacultyDashboard() {
   const [faculty, setFaculty] = useState<Faculty | null>(null);
@@ -115,6 +115,7 @@ export default function FacultyDashboard() {
           <>
             <MenuItem title="Assigned Subjects" onPress={fetchAssignedSubjects} />
             <MenuItem title="Take Attendance" onPress={fetchSubjectsForAttendance} />
+            <MenuItem title="Logout" textColor="red"/>
           </>
         ) : mode === "subjects" ? (
           <View>
@@ -126,134 +127,67 @@ export default function FacultyDashboard() {
               <ActivityIndicator size="large" />
             ) : (
               subjects.map((subject: FacultySubjectMapping) => (
-                <View
+                <MenuItem
                   key={subject.mappingId}
-                  style={styles.subjectCard}
-                >
-                  <Text style={styles.subjectTitle}>
-                    {subject.subjectCode}
-                  </Text>
-
-                  <Text style={styles.subjectText}>
-                    Semester: {subject.semester}
-                  </Text>
-
-                  <Text style={styles.subjectText}>
-                    Section: {subject.section}
-                  </Text>
-
-                  <Text style={styles.subjectText}>
-                    Type:{" "}
-                    {subject.subjectType === "T"
-                      ? "Theory"
-                      : "Practical"}
-                  </Text>
-                </View>
+                  title={`${subject.subjectCode}`}
+                  subtitle={[
+                    `Semester: ${subject.semester}`,
+                    `Section: ${subject.section}`,
+                    `Type: ${subject.subjectType === "T" ? "Theory" : "Practical"}`
+                  ]}
+                />
               ))
             )}
 
-            <TouchableOpacity
-              style={styles.backButton}
-              onPress={() =>
-                setMode("menu")
-              }
-            >
-              <Text style={styles.backButtonText}>
-                Back
-              </Text>
+            <TouchableOpacity style={styles.backButton} onPress={() =>setMode("menu")}>
+              <Text style={styles.backButtonText}>Back</Text>
             </TouchableOpacity>
+
           </View>
         ) : (
           <View>
-            <Text style={styles.sectionTitle}>
-              Select Subject
-            </Text>
+            <Text style={styles.sectionTitle}>Select Subject</Text>
 
             {subjectsLoading ? (
               <ActivityIndicator size="large" />
             ) : (
               subjects.map((subject: FacultySubjectMapping) => (
-                <TouchableOpacity
-                  key={subject.mappingId}
-                  style={styles.subjectCard}
+                <MenuItem 
+                  key={subject.mappingId} 
+                  title={`${subject.subjectCode}`}
+
+                  subtitle={
+                    [`Semester: ${subject.semester}`, 
+                    `Section: ${subject.section}`, 
+                    `Type: ${subject.subjectType === "T" ? "Theory" : "Practical"}`]
+                  }
+
                   onPress={() => startLecture(subject)}
-                >
-                  <Text style={styles.subjectTitle}>
-                    {subject.subjectCode}
-                  </Text>
-
-                  <Text style={styles.subjectText}>
-                    Semester: {subject.semester}
-                  </Text>
-
-                  <Text style={styles.subjectText}>
-                    Section: {subject.section}
-                  </Text>
-
-                  <Text style={styles.subjectText}>
-                    Type:{" "}
-                    {subject.subjectType === "T"
-                      ? "Theory"
-                      : "Practical"}
-                  </Text>
-                </TouchableOpacity>
+                />
               ))
             )}
 
             {currentLectureId ? (
               <View style={{ marginTop: 20 }}>
-                <Text
-                  style={{
-                    fontSize: 18,
-                    fontWeight: "bold",
-                  }}
-                >
-                  Active Lecture
-                </Text>
+                <Text style={{ fontSize: 18, fontWeight: "bold"}}>Active Lecture</Text>
 
-                <Text
-                  style={{
-                    marginTop: 5,
-                    marginBottom: 15,
-                    fontSize: 16,
-                  }}
-                >
+                <Text style={{ marginTop: 5,  marginBottom: 15, fontSize: 16 }}>
                   {currentLectureId}
                 </Text>
 
-                <TouchableOpacity
-                  style={[
-                    styles.menuItem,
-                    {
-                      backgroundColor: "#ef4444",
-                    },
-                  ]}
-                  onPress={endLecture}
-                >
-                  <Text
-                    style={{
-                      color: "white",
-                      textAlign: "center",
-                      fontWeight: "bold",
-                    }}
-                  >
+                <TouchableOpacity style={[ styles.menuItem, { backgroundColor: "#ef4444" }]} onPress={endLecture}>
+                  <Text style={{color: "white",textAlign: "center",fontWeight: "bold"}}>
                     End Lecture
                   </Text>
                 </TouchableOpacity>
+
               </View>
             ) : null}
 
-            <TouchableOpacity
-              style={styles.backButton}
-              onPress={() => {
-                setMode("menu");
-                setCurrentLectureId("");
-              }}
-            >
-              <Text style={styles.backButtonText}>
-                Back
-              </Text>
+            <TouchableOpacity style={styles.backButton} onPress={()=>{setMode("menu");setCurrentLectureId("");}}>
+              <Text style={styles.backButtonText}>Back</Text>
             </TouchableOpacity>
+            
           </View>
         )}
       </View>
@@ -271,19 +205,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f8fafc",
-  },
-
-  navbar: {
-    backgroundColor: "#39367B",
-    paddingTop: 60,
-    paddingBottom: 20,
-    paddingHorizontal: 20,
-  },
-
-  welcomeText: {
-    color: "white",
-    fontSize: 22,
-    fontWeight: "bold",
   },
 
   menuContainer: {

@@ -1,7 +1,8 @@
 import LoadingScreen from "@/components/LoadingScreen/LoadingScreen";
-import axios from "axios";
+import { useAuth } from "@/contexts/AuthContext";
+import { api } from "@/services/api";
 import * as Location from "expo-location";
-import { Stack } from "expo-router";
+import { router, Stack } from "expo-router";
 import { useEffect, useState } from "react";
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 
@@ -19,26 +20,23 @@ export default function Dashboard() {
     attendancePercentage: number | string;
   } | null>(null);
 
-
+  const { user, setUser } = useAuth();
 
   useEffect(() => {
     const fetchStudent = async () => {
       try {
-        const response = await axios.get(
-          "http://localhost:3000/student/me",
-          {
-            withCredentials: true,
-          }
-        );
-
+        const response = await api.get("/student/me");
+        setUser(response.data.student);
         setName(response.data.student.name);
-      } catch (error: any) {
-        console.log(error.response?.data || error.message);
-      } finally {
+      }
+      catch (error) {
+        console.log(error);
+        router.replace("/");
+      }
+      finally {
         setLoading(false);
       }
     };
-
     fetchStudent();
   }, []);
 
@@ -57,17 +55,11 @@ export default function Dashboard() {
       const latitude = location.coords.latitude;
       const longitude = location.coords.longitude;
 
-      const response = await axios.post(
-        "http://localhost:3000/student/mark-attendance",
-        {
-          lectureId: attendanceCode,
-          studentLatitude: latitude,
-          studentLongitude: longitude
-        },
-        {
-          withCredentials: true,
-        }
-      );
+      const response = await api.post("/student/mark-attendance", {
+        lectureId: attendanceCode,
+        studentLatitude: latitude,
+        studentLongitude: longitude
+      });
 
       console.log(response.data);
 
@@ -88,13 +80,24 @@ export default function Dashboard() {
   const fetchAttendance = async () => {
     try {
 
-      const response = await axios.get("http://localhost:3000/student/attendance", { withCredentials: true, });
+      const response = await api.get("/student/attendance");
       setAttendanceData(response.data);
       setShowAttendanceView(true);
     }
     catch (error: any) {
       console.log(error.response?.data || error.message);
       alert("Failed to fetch attendance");
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await api.post("/auth/logout");
+      setUser(null);
+      router.replace("/");
+    }
+    catch (error) {
+      console.log(error);
     }
   };
 
@@ -105,14 +108,12 @@ export default function Dashboard() {
   return (
     <View style={styles.container}>
 
-      <Stack.Screen options={{ headerShown: false }}/>
+      <Stack.Screen options={{ headerShown: false }} />
 
       {/* Navbar */}
 
       <View style={styles.navbar}>
-        <Text style={styles.welcomeText}>
-          Welcome, {name}
-        </Text>
+        <Text style={styles.welcomeText}>Welcome, {name}</Text>
       </View>
 
       {/* Content */}
@@ -121,22 +122,16 @@ export default function Dashboard() {
         {!showAttendanceForm && !showAttendanceView ? (
 
           <>
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => setShowAttendanceForm(true)}
-            >
-              <Text style={styles.menuText}>
-                Mark Attendance
-              </Text>
+            <TouchableOpacity style={styles.menuItem} onPress={() => setShowAttendanceForm(true)}>
+              <Text style={styles.menuText}>Mark Attendance</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={fetchAttendance}
-            >
-              <Text style={styles.menuText}>
-                View Attendance
-              </Text>
+            <TouchableOpacity style={styles.menuItem} onPress={fetchAttendance}>
+              <Text style={styles.menuText}>View Attendance</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.menuItem} onPress={handleLogout}>
+              <Text style={styles.menuText}>Logout</Text>
             </TouchableOpacity>
           </>
 
@@ -160,15 +155,8 @@ export default function Dashboard() {
               Total Lectures: {attendanceData?.totalLectures}
             </Text>
 
-            <TouchableOpacity
-              style={styles.backButton}
-              onPress={() => {
-                setShowAttendanceView(false);
-              }}
-            >
-              <Text style={styles.backButtonText}>
-                Back
-              </Text>
+            <TouchableOpacity style={styles.backButton} onPress={() => { setShowAttendanceView(false) }}>
+              <Text style={styles.backButtonText}>Back</Text>
             </TouchableOpacity>
 
           </View>
@@ -181,32 +169,15 @@ export default function Dashboard() {
               Mark Attendance
             </Text>
 
-            <TextInput
-              style={styles.input}
-              placeholder="Enter Attendance Code"
-              value={attendanceCode}
-              onChangeText={setAttendanceCode}
-            />
-
-            <TouchableOpacity
-              style={styles.button}
-              onPress={handleAttendanceSubmit}
-            >
-              <Text style={styles.buttonText}>
-                Submit Attendance
-              </Text>
+            <TextInput style={styles.input} placeholder="Enter Attendance Code" 
+              value={attendanceCode} onChangeText={setAttendanceCode} />
+            <TouchableOpacity style={styles.button} onPress={handleAttendanceSubmit}>
+              <Text style={styles.buttonText}>Submit Attendance</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.backButton}
-              onPress={() => {
-                setShowAttendanceForm(false);
-                setAttendanceCode("");
-              }}
-            >
-              <Text style={styles.backButtonText}>
-                Back
-              </Text>
+            <TouchableOpacity style={styles.backButton} 
+              onPress={() => { setShowAttendanceForm(false); setAttendanceCode("") }}>
+              <Text style={styles.backButtonText}>Back</Text>
             </TouchableOpacity>
 
           </View>
@@ -214,6 +185,7 @@ export default function Dashboard() {
         )}
 
       </View>
+
     </View>
   );
 }

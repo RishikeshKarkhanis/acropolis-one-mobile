@@ -1,18 +1,25 @@
-import { Faculty } from "@/types/Faculty";
 import { createContext, useContext, useState } from "react";
 
+type User = {
+    role: "student" | "faculty" | "admin";
+
+    [key: string]: any;
+};
+
 type AuthContextType = {
-    faculty: Faculty | null;
-    setFaculty: (faculty: Faculty | null) => void;
+    user: User | null;
+    setUser: (
+        user: User | null
+    ) => void;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-    const [faculty, setFaculty] = useState<Faculty | null>(null);
+    const [user, setUser] = useState<User | null>(null);
 
     return (
-        <AuthContext.Provider value={{ faculty, setFaculty }}>
+        <AuthContext.Provider value={{ user, setUser }}>
             {children}
         </AuthContext.Provider>
     );

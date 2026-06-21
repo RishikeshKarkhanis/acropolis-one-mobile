@@ -1,12 +1,15 @@
+import { useAuth } from "@/contexts/AuthContext";
+import { api } from "@/services/api";
 import { router, Stack } from "expo-router";
 import React, { useState } from "react";
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
-import { api } from "../services/api";
 
 export default function Home() {
-  const [role, setRole] = useState<"student" | "faculty" | "admin"> ("student");
+  const [role, setRole] = useState<"student" | "faculty" | "admin">("student");
   const [userId, setUserId] = useState("");
   const [password, setPassword] = useState("");
+
+  const { setUser } = useAuth();
 
   const handleLogin = async () => {
     try {
@@ -14,54 +17,48 @@ export default function Home() {
 
       switch (role) {
         case "student":
-          requestBody = {scholarNumber: userId, password};
+          requestBody = { scholarNumber: userId, password };
           break;
 
         case "faculty":
-          requestBody = { employeeNumber: userId, password};
+          requestBody = { employeeNumber: userId, password };
           break;
 
         case "admin":
-          requestBody = {adminNumber: userId, password};
+          requestBody = { adminNumber: userId, password };
           break;
       }
 
       console.log("Request Body:", requestBody);
 
-
-      // ####### WILL BE REMOVED LATER, THIS IS JUST FOR TESTING PURPOSES #######
-
-      // const response = await axios.post(
-      //   `http://localhost:3000/auth/login/${role}`,
-      //   requestBody,
-      //   {
-      //     withCredentials: true,
-      //   }
-      // );
-
-      // ####### WILL BE REMOVED LATER, THIS IS JUST FOR TESTING PURPOSES #######
-
-
+      // Login
       const response = await api.post(`/auth/login/${role}`,requestBody);
 
-      console.log(response.data);
-
       if (response.data.success) {
+
+        // Fetch current authenticated user
+        const meResponse = await api.get(`/${role}/me`);
+
+        setUser(meResponse.data[role]);
+
+        console.log("Logged In User:", meResponse.data[role]);
+
         switch (role) {
           case "student":
-            router.push("/student-home");
+            router.replace("/student-home");
             break;
 
           case "faculty":
-            router.push("/faculty-home");
+            router.replace("/faculty-home");
             break;
 
           case "admin":
-            router.push("/admin-home");
+            router.replace("/admin-home");
             break;
         }
       }
     } catch (error: any) {
+
       console.log("Login Failed");
 
       if (error.response) {
@@ -90,7 +87,7 @@ export default function Home() {
 
   return (
     <View style={styles.container}>
-      <Stack.Screen options={{ headerShown: false }}/>
+      <Stack.Screen options={{ headerShown: false }} />
       <Text style={styles.title}>Login</Text>
 
       {/* Role Selector */}

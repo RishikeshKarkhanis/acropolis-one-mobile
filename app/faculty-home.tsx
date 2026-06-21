@@ -9,23 +9,32 @@ import Navbar from "../components/Navbar/Navbar";
 import { api } from "../services/api";
 
 export default function FacultyDashboard() {
-  const { faculty, setFaculty } = useAuth();
+  const { user, setUser } = useAuth();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchFaculty = async () => {
       try {
-        const response = await api.get("faculty/me");
-        setFaculty(response.data.faculty);
-      } 
-      catch (error: any) {console.log(error.response?.data || error.message)} 
+        const response = await api.get("/faculty/me");
+        setUser(response.data.faculty);
+      }
+      catch (error: any) { console.log(error.response?.data || error.message); router.replace("/"); }
       finally { setLoading(false) }
     };
     fetchFaculty();
-  }, [setFaculty]);
+  }, [setUser]);
 
   const goToAssignedSubjects = () => {
     router.push("/assigned-subjects");
+  };
+
+  const handleLogout = async () => {
+    try {
+      await api.post("/auth/logout");
+      setUser(null);
+      router.replace("/");
+    } 
+    catch (error) {console.log(error) }
   };
 
   if (loading) {
@@ -36,11 +45,11 @@ export default function FacultyDashboard() {
     <View style={styles.container}>
       <Stack.Screen options={{ headerShown: false }} />
 
-      <Navbar faculty={faculty} />
+      <Navbar faculty={user} />
 
       <View style={styles.menuContainer}>
-        <MenuItem title="Take Attendance" onPress={goToAssignedSubjects}/>
-        <MenuItem title="Logout" textColor="red"/>
+        <MenuItem title="Take Attendance" onPress={goToAssignedSubjects} />
+        <MenuItem title="Logout" onPress={handleLogout} textColor="red" />
       </View>
     </View>
   );

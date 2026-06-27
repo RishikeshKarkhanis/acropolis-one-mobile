@@ -8,7 +8,7 @@ import { api } from "../services/api";
 
 export default function TakeAttendance() {
 
-  const { faculty } = useAuth();
+  const { user } = useAuth();
   const [currentLectureId, setCurrentLectureId] = useState("");
   const { subjectCode, semester, section, subjectType } = useLocalSearchParams();
 
@@ -43,7 +43,7 @@ export default function TakeAttendance() {
         const response = await api.post("/faculty/create-lecture-session", {
           subjectCode: subjectCode,
           semester: Number(semester),
-          department: faculty?.department,
+          department: user?.department,
           division: Number(section),
           lectureType: subjectType,
           facultyLatitude: latitude,
@@ -56,12 +56,12 @@ export default function TakeAttendance() {
       catch (error: any) { alert(error.response?.data?.message || "Failed to create lecture"); }
     };
     startLecture();
-  }, [faculty, subjectCode, semester, section, subjectType]);
+  }, [user, subjectCode, semester, section, subjectType]);
 
   return (
     <View style={styles.container}>
       <Stack.Screen options={{ headerShown: false }} />
-      <Navbar faculty={faculty} />
+      <Navbar user={user} />
       <View style={styles.content}>
         <Text style={styles.pageTitle}>Active Lecture</Text>
         <View style={styles.lectureCard}>

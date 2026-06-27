@@ -45,7 +45,7 @@ export default function FacultyDashboard() {
     <View style={styles.container}>
       <Stack.Screen options={{ headerShown: false }} />
 
-      <Navbar faculty={user} />
+      <Navbar user={user} />
 
       <View style={styles.menuContainer}>
         <MenuItem title="Take Attendance" onPress={goToAssignedSubjects} />

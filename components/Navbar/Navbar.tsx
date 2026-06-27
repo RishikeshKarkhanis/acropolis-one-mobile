@@ -15,11 +15,11 @@ const styles = StyleSheet.create({
   }
 });
 
-export default function Navbar(props: { faculty: any }) {
+export default function Navbar(props: { user: any }) {
     return (
         <View style={styles.navbar}>
             <Text style={styles.welcomeText}>
-                Welcome, {props.faculty?.name || "Faculty"}
+                Welcome, {props.user?.name}
             </Text>
         </View>)
 }

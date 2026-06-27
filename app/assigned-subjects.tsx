@@ -35,7 +35,7 @@ export default function AssignedSubjects() {
     <ScrollView style={styles.container}>
 
       <Stack.Screen options={{ headerShown: false }} />
-      <Navbar faculty={user} />
+      <Navbar user={user} />
 
       <Text style={styles.pageTitle}>Assigned Subjects</Text>
 
